@@ -68,17 +68,44 @@ def search():
         
         # Prepare prompt for Ollama
         prompt = f"""
-Query: {input_keyword}
+# TASK DEFINITION
+You are an expert log consultant, analyzer, and debugging specialist. Your task is to analyze the query and log-related search results provided, then deliver a clear diagnostic assessment and actionable solutions.
 
-Search Results:
+## QUERY
+{input_keyword}
+
+## SEARCH RESULTS
 {json.dumps(formatted_results, indent=2)}
 
-Based on the query and search results above, provide a concise and relevant response to the user's query.
+## INSTRUCTIONS
+1. ANALYZE: First, understand the log patterns, error messages, and system behaviors described in the search results
+2. IDENTIFY: Detect anomalies, error patterns, root causes, or system bottlenecks in the logs
+3. DIAGNOSE: Determine the most likely underlying issues based on the log evidence
+4. SOLVE: Provide specific solutions to address the identified problems
+5. PREVENT: Suggest monitoring, alerting, or code improvements to prevent similar issues
+6. EXPLAIN: Clarify complex log patterns or technical concepts when necessary
+
+## RESPONSE FORMAT
+- Start with a clear summary of the log analysis findings
+- Include specific log entries that indicate problems, with explanation
+- Provide concrete debugging steps or solutions
+- When applicable, include code snippets for fixes or improved logging
+- Prioritize issues by severity/impact when multiple problems exist
+- End with preventative recommendations
+
+## IMPORTANT NOTES
+- Recognize common log patterns across different technologies (web servers, databases, containers, etc.)
+- Interpret timestamps, sequence of events, and correlation between different log entries
+- Be aware that logs may be incomplete or misleading; account for gaps in information
+- If log information is insufficient, acknowledge limitations and suggest what additional logs would help
+- Consider environmental factors (load, memory, network, etc.) that might contribute to issues
+
+Respond as an experienced SRE/DevOps engineer helping diagnose and resolve production issues.
 """
         
         # Send to Ollama
         ollama_payload = {
-            "model": "deepseek-r1:1.5B",
+            "model": "deepseek-coder-v2:latest",
             "prompt": prompt,
             "stream": False
         }
@@ -93,9 +120,8 @@ Based on the query and search results above, provide a concise and relevant resp
         
         # Return response to original caller
         return jsonify({
-            "query": input_keyword,
-            "search_results": formatted_results,
-            "ollama_response": response_text
+    
+            "response": response_text
         })
         
     except Exception as e:
